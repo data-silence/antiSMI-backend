@@ -7,7 +7,7 @@ from app.db import Base
 
 
 class News(Base):
-    __tablename__ = 'test_table'
+    __tablename__ = 'news'
     url: Mapped[str] = mapped_column(primary_key=True)
     category: Mapped[str] = mapped_column(nullable=False)
     title: Mapped[str] = mapped_column(nullable=False)
@@ -18,4 +18,4 @@ class News(Base):
     agency: Mapped[str] = mapped_column(nullable=False)
 
     def __str__(self):
-        return f"News #{self.url}"
+        return f"News {self.url}"

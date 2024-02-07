@@ -1,9 +1,11 @@
 from datetime import datetime
 
 from pydantic import BaseModel
+from pydantic_core import Url
+
 
 class SNews(BaseModel):
-    url: str
+    url: Url
     category: str
     title: str
     resume: str
@@ -17,7 +19,7 @@ class SNews(BaseModel):
 
 
 class SShortNews(BaseModel):
-    url: str
+    url: Url
     title: str
     resume: str
     date: datetime
