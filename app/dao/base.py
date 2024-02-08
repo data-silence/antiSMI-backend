@@ -1,4 +1,4 @@
-from sqlalchemy import select, func
+from sqlalchemy import select
 
 from app.db import async_session_maker
 
