@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def get_time_period() -> tuple:
-    time_now = datetime.now()
+    time_now = datetime.now() - timedelta(hours=3)
 
     start = datetime(year=time_now.year, month=time_now.month, day=time_now.day, hour=00, minute=00)
     end = datetime(year=time_now.year, month=time_now.month, day=time_now.day, hour=23, minute=59)
