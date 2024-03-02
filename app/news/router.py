@@ -14,7 +14,7 @@ async def get_allowed_quota() -> list[SShortNews]:
     start, end = get_time_period()
     return await NewsDao.get_allowed_news_by_date(start=start, end=end)
 
-# @router.get('/last_quota')
-# async def get_quota() -> list[SShortNews]:
-#     start, end = get_time_period()
-#     return await NewsDao.get_news_by_date(start=start, end=end)
+@router.get('/last_quota')
+async def get_quota() -> list[SShortNews]:
+    start, end = get_time_period()
+    return await NewsDao.get_news_by_date(start=start, end=end)
