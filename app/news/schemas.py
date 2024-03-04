@@ -26,3 +26,17 @@ class SShortNews(BaseModel):
 
     class Config:
         from_attributes = True
+
+class SNewsembs(BaseModel):
+    url: Url
+    category: str
+    title: str
+    resume: str
+    news: str
+    date: datetime
+    links: str
+    agency: str
+    emb: list[int]
+
+    class Config:
+        from_attributes = True

@@ -25,6 +25,3 @@ def get_time_period(user_date: datetime.date = datetime.now()) -> tuple: #  + ti
             end = datetime(year=time_now.year, month=time_now.month, day=time_now.day, hour=20, minute=55)
 
     return start, end
-
-
-print(get_time_period())
