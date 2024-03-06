@@ -1,7 +1,22 @@
-from datetime import datetime, timedelta
+from datetime import datetime
+import pandas as pd
+import json
+import requests
+from io import StringIO
+import datetime as dt
+from sklearn.cluster import AgglomerativeClustering
+from dataclasses import dataclass, field
+from collections import Counter
+import numpy as np
+from numpy.linalg import norm
+
+api_url = "http://127.0.0.1:8000"
+default_day = dt.date(year=2014, month=2, day=22)
+default_categories = ['society', 'economy', 'technology', 'entertainment', 'science', 'sports']
 
 
-def get_time_period(user_date: datetime.date = datetime.now()) -> tuple: #  + timedelta(hours=3)
+
+def get_time_period(user_date: datetime.date = datetime.now()) -> tuple:  # + timedelta(hours=3)
     time_now = user_date
 
     start = datetime(year=time_now.year, month=time_now.month, day=time_now.day, hour=00, minute=00)
@@ -25,3 +40,91 @@ def get_time_period(user_date: datetime.date = datetime.now()) -> tuple: #  + ti
             end = datetime(year=time_now.year, month=time_now.month, day=time_now.day, hour=20, minute=55)
 
     return start, end
+
+
+def get_date_df_from_handler(date: dt.date) -> pd.DataFrame:
+    """Converts json received from API to dataframe"""
+    handler_url = f"{api_url}/news/tm/{str(date)}"
+    response = requests.get(handler_url).json()
+    json_dump = json.dumps(response)
+    df = pd.read_json(StringIO(json_dump))
+    return df
+
+
+def get_clusters_columns(date: dt.date) -> pd.DataFrame:
+    df = get_date_df_from_handler(date)
+
+    if len(df) > 1:  # кластеризацию возможно сделать только если количество новостей более одной
+        model = AgglomerativeClustering(n_clusters=None, metric='cosine', linkage='complete',
+                                        distance_threshold=0.3)
+        labels = model.fit_predict(list(df.embedding))
+        df.loc[:, 'label'] = labels
+
+    elif len(df) == 1:  # если новость одна - присваиваем ей лейбл = -1
+        df.loc[:, 'label'] = -1
+    # чтобы избежать отнесения одной новости по разным категориям, присвоим одному лейблу наиболее частую категорию,
+    trans = df.groupby(by=['label'])['category'].agg(pd.Series.mode)
+    df['new'] = df.label.apply(lambda x: trans.iloc[x])
+
+    # Удаляем вспомогательные столбцы и сортируем
+    df.drop(columns='category', inplace=True)
+    df.rename(columns={'new': 'category'}, inplace=True)
+    df.sort_values(by=['category', 'label'], ascending=True, inplace=True)
+
+    return df
+
+
+def filter_df(df: pd.DataFrame, amount: int = 3, categories: list = ['society', 'technology', 'sport']) -> pd.DataFrame:
+    df = df.loc[df['category'].isin(categories)]
+    final_labels = []
+    for category in categories:
+        most_tuple = Counter(list(df.label[df.category == category])).most_common(amount)
+        most_labels = [el[0] for el in most_tuple]
+        final_labels.extend(most_labels)
+    return df[df.label.isin(final_labels)]
+
+
+def cos_simularity(a, b):
+    cos_sim = np.dot(a, b) / (norm(a) * norm(b))
+    return cos_sim
+
+
+def find_sim_news(df: pd.DataFrame, q_emb: list[float]):
+    df.loc[:, 'sim'] = df['embedding'].apply(lambda x: cos_simularity(q_emb, x))
+    best_result = df[df.sim == df.sim.max()]
+    return best_result
+
+
+@dataclass
+class NewsService:
+    date: dt.date = default_day
+    news_amount: int = 3
+    categories: list[str] = field(default_factory=list)
+
+    def __post_init__(self):
+        self.categories = default_categories
+        self.date_df = get_clusters_columns(date=self.date)
+        self.most_df = filter_df(self.date_df, amount=self.news_amount, categories=self.categories)
+
+    def set_news_amount(self, news_amount: int):
+        self.news_amount = news_amount
+        self.most_df = filter_df(self.date_df, amount=self.news_amount, categories=self.categories)
+
+    def set_categories(self, categories: list[str]):
+        self.categories = categories
+        self.most_df = filter_df(self.date_df, amount=self.news_amount, categories=self.categories)
+
+    def set_date_df(self, date: dt.date):
+        self.date = date
+        self.date_df = get_clusters_columns(date=self.date)
+        self.most_df = filter_df(self.date_df, amount=self.news_amount, categories=self.categories)
+
+    def leave_me_alone(self) -> pd.DataFrame:
+        unique_labels = set(self.most_df.label.tolist())
+        url_final_list = []
+        for label in unique_labels:
+            avg_emb = np.array(list(self.most_df.embedding[self.most_df.label == label])).mean(axis=0)
+            best_url = find_sim_news(self.most_df, avg_emb).url.index[0]
+            url_final_list.append(best_url)
+        final_df = self.most_df[self.most_df.index.isin(url_final_list)].drop(columns=['sim', 'embedding', 'label'])
+        return final_df

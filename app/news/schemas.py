@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 from pydantic_core import Url
+from enum import Enum
+
 
 
 class SShortNews(BaseModel):
@@ -29,3 +31,12 @@ class SEmbsNews(SFullNews):
 
     class Config:
         from_attributes = True
+
+class CategoriesNames(str, Enum):
+    """"Enum Class, contains the available news categories"""
+    ECONOMY = 'economy'
+    SCIENCE = 'science'
+    SPORTS = 'sports'
+    TECHNOLOGY = 'technology'
+    ENTERTAINMENT = 'entertainment'
+    SOCIETY = 'society'
