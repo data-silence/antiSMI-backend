@@ -15,7 +15,6 @@ default_day = dt.date(year=2014, month=2, day=22)
 default_categories = ['society', 'economy', 'technology', 'entertainment', 'science', 'sports']
 
 
-
 def get_time_period(user_date: datetime.date = datetime.now()) -> tuple:  # + timedelta(hours=3)
     time_now = user_date
 
@@ -65,6 +64,8 @@ def get_clusters_columns(date: dt.date) -> pd.DataFrame:
     # чтобы избежать отнесения одной новости по разным категориям, присвоим одному лейблу наиболее частую категорию,
     trans = df.groupby(by=['label'])['category'].agg(pd.Series.mode)
     df['new'] = df.label.apply(lambda x: trans.iloc[x])
+    # Оставляем только одно значение, если мода выдаёт несколько значений в np.ndarray
+    df.loc[:, 'new'] = df.new.apply(lambda x: x[0] if isinstance(x, np.ndarray) else x)
 
     # Удаляем вспомогательные столбцы и сортируем
     df.drop(columns='category', inplace=True)
@@ -119,6 +120,18 @@ class NewsService:
         self.date_df = get_clusters_columns(date=self.date)
         self.most_df = filter_df(self.date_df, amount=self.news_amount, categories=self.categories)
 
+    def get_source_links(self, title: str):
+        cluster = self.most_df.label[self.most_df.title == title].iloc[0]
+
+        links_set = set()
+        links = self.most_df['links'][self.most_df.label == cluster].tolist()
+        urls = self.most_df['url'][self.most_df.label == cluster].tolist()
+        for group in links:
+            group = group.split(',')
+            links_set.update(group)
+        links_set.update(urls)
+        return ' '.join(list(links_set))
+
     def leave_me_alone(self) -> pd.DataFrame:
         unique_labels = set(self.most_df.label.tolist())
         url_final_list = []
@@ -127,4 +140,5 @@ class NewsService:
             best_url = find_sim_news(self.most_df, avg_emb).url.index[0]
             url_final_list.append(best_url)
         final_df = self.most_df[self.most_df.index.isin(url_final_list)].drop(columns=['sim', 'embedding', 'label'])
+        final_df.links = final_df.title.apply(lambda x: self.get_source_links(x))
         return final_df
