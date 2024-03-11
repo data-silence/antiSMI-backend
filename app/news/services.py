@@ -9,16 +9,19 @@ from dataclasses import dataclass, field
 from collections import Counter
 import numpy as np
 from numpy.linalg import norm
+from app.news.embs_exps import make_single_embs
+import torch
+from transformers import AutoTokenizer, AutoModel
 
 api_url = "http://127.0.0.1:8000"
 default_day = dt.date(year=2014, month=2, day=22)
 default_categories = ['society', 'economy', 'technology', 'entertainment', 'science', 'sports']
 
 
-def get_time_period(start_date: datetime.date = datetime.now(), end_date: datetime.date = None) -> tuple:  # + timedelta(hours=3)
+def get_time_period(start_date: datetime.date = datetime.now(),
+                    end_date: datetime.date = None) -> tuple:  # + timedelta(hours=3)
     if end_date is None:
         end_date = start_date
-
 
     start = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=00, minute=00)
     end = datetime(year=end_date.year, month=end_date.month, day=end_date.day, hour=23, minute=59)
@@ -144,3 +147,21 @@ class NewsService:
         final_df = self.most_df[self.most_df.index.isin(url_final_list)].drop(columns=['sim', 'embedding', 'label'])
         final_df.links = final_df.title.apply(lambda x: self.get_source_links(x))
         return final_df
+
+
+def get_today_emb():
+    """Converts json received from API to dataframe"""
+    handler_url = f"{api_url}/news/asmi/today/brief"
+    response = requests.get(handler_url).json()
+    json_dump = json.dumps(response)
+    df = pd.read_json(StringIO(json_dump))
+    df['embedding'] = df['news'].apply(lambda x: make_single_embs(x))
+    emb_news_dict = df.to_dict(orient='records')
+    return emb_news_dict
+
+
+if __name__ == "__main__":
+    df = get_today_emb()
+    df.to_dict(orient='records')
+    print()
+    # print(dt.datetime.now() - start)

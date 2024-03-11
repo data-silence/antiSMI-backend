@@ -22,10 +22,10 @@ async def get_allowed_quota() -> list[SShortNews]:
     return await NewsDao.get_allowed_news_by_date(start=start, end=end)
 
 
-@router.get('/last_quota')
+@router.get('/asmi/today/brief')
 async def get_quota() -> list[SFullNews]:
     start, end = get_time_period()
-    return await NewsDao.get_news_by_date(start=start, end=end, agency='meduzalive')
+    return await NewsDao.get_news_by_date(start=start, end=end)
 
 
 @router.get('/tm/{start_date}/{end_date}')
@@ -37,6 +37,12 @@ async def get_embs_news(start_date: date = date.today(), end_date: date = date.t
 @router.get('/tm/get_neighbour')
 async def get_neighbour(vector: list[float]) -> list[SEmbsNews]:
     return await NewsDao.get_nearest_neib(vector)
+
+
+# @router.get('/asmi/today/full')
+# async def get_embs_full() -> list[SEmbsNews]:
+#     return get_today_emb()
+
 
 # @router.post('/tm/get_date_news')
 # def get_news_by_date(date: dt.date = default_day, news_amount: int = 3,
