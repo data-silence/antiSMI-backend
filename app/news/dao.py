@@ -34,7 +34,6 @@ class NewsDao(BaseDao):
             result = await session.execute(query)
             return result.mappings().all()
 
-
     @staticmethod
     async def get_embs_news(start: date, end: date, **filter_by):
         async with tm_async_session_maker() as session:
@@ -45,14 +44,12 @@ class NewsDao(BaseDao):
             return result.mappings().all()
 
     @staticmethod
-    async def get_nearest_neib(emb: list[float]):
+    async def get_similar_news(embedding: list[float]):
         async with tm_async_session_maker() as session:
-            query = select(News.__table__.columns, Embs.embedding).order_by(Embs.embedding.l2_distance(emb)).limit(1)
+            query = select(News.__table__.columns, Embs.embedding).join(News, Embs.news_url == News.url).order_by(
+                Embs.embedding.l2_distance(embedding)).limit(10)
             result = await session.execute(query)
             return result.mappings().all()
-
-
-
 
     # @classmethod
     # async def find_all(cls, **filter_by):
@@ -60,4 +57,3 @@ class NewsDao(BaseDao):
     #         query = select(cls.model.__table__.columns).filter_by(**filter_by)
     #         result = await session.execute(query)
     #         return result.mappings().all()
-

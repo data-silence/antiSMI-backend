@@ -34,9 +34,9 @@ async def get_embs_news(start_date: date = date.today(), end_date: date = date.t
     return await NewsDao.get_embs_news(start=start, end=end)
 
 
-@router.get('/tm/get_neighbour')
-async def get_neighbour(vector: list[float]) -> list[SEmbsNews]:
-    return await NewsDao.get_nearest_neib(vector)
+@router.post('/tm/get_similar_news')
+async def get_most_similar_news(embedding: list[float]) -> list[SEmbsNews]:
+    return await NewsDao.get_similar_news(embedding)
 
 
 # @router.get('/asmi/today/full')
