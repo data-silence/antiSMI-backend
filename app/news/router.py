@@ -34,11 +34,9 @@ async def get_embs_news(start_date: date = date.today(), end_date: date = date.t
     return await NewsDao.get_embs_news(start=start, end=end)
 
 
-@router.post('/tm/get_similar_news/{start_date}/{end_date}')
-async def get_most_similar_news(embedding: list[float], start_date: date, end_date: date, news_amount: int,
-                                category: str) -> list[SEmbsNews]:
-    return await NewsDao.get_similar_news(embedding=embedding, start_date=start_date, end_date=end_date,
-                                          news_amount=news_amount, category=category)
+@router.post('/tm/get_similar_news')
+async def get_most_similar_news(embedding: list[float]) -> list[SEmbsNews]:
+    return await NewsDao.get_similar_news(embedding=embedding)
 
 # @router.get('/asmi/today/full')
 # async def get_embs_full() -> list[SEmbsNews]:

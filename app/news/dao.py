@@ -43,15 +43,26 @@ class NewsDao(BaseDao):
             result = await session.execute(query)
             return result.mappings().all()
 
+
     @staticmethod
-    async def get_similar_news(embedding: list[float], start_date: date, end_date: date, news_amount: int,
-                               category: str):
+    async def get_similar_news(embedding: list[float]):
         async with tm_async_session_maker() as session:
-            query = select(News.__table__.columns, Embs.embedding).join(News, Embs.news_url == News.url).where(
-                and_(start_date <= News.date, News.date <= end_date)).filter(News.category == category).order_by(
-                Embs.embedding.l2_distance(embedding)).limit(news_amount)
+            query = select(News.__table__.columns, Embs.embedding).join(News, Embs.news_url == News.url).order_by(
+                Embs.embedding.l2_distance(embedding)).limit(100)
             result = await session.execute(query)
             return result.mappings().all()
+
+
+
+    # @staticmethod
+    # async def get_similar_news(embedding: list[float], start_date: date, end_date: date, news_amount: int,
+    #                            category: str):
+    #     async with tm_async_session_maker() as session:
+    #         query = select(News.__table__.columns, Embs.embedding).join(News, Embs.news_url == News.url).where(
+    #             and_(start_date <= News.date, News.date <= end_date)).filter(News.category == category).order_by(
+    #             Embs.embedding.l2_distance(embedding)).limit(news_amount)
+    #         result = await session.execute(query)
+    #         return result.mappings().all()
 
     # @classmethod
     # async def find_all(cls, **filter_by):
