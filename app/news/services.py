@@ -153,6 +153,7 @@ def get_today_emb():
     """Converts json received from API to dataframe"""
     handler_url = f"{api_url}/news/asmi/today/brief"
     response = requests.get(handler_url).json()
+    # print(response)
     json_dump = json.dumps(response)
     df = pd.read_json(StringIO(json_dump))
     df['embedding'] = df['news'].apply(lambda x: make_single_embs(x))
@@ -161,7 +162,8 @@ def get_today_emb():
 
 
 if __name__ == "__main__":
+
     df = get_today_emb()
-    df.to_dict(orient='records')
-    print()
+    print(df.head())
+    # print(get_time_period())
     # print(dt.datetime.now() - start)

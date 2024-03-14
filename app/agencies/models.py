@@ -34,6 +34,7 @@ class Agencies(Base):
     prior_country: Mapped[str] = mapped_column()
     benef_country: Mapped[str] = mapped_column()
     is_forbidden: Mapped[bool] = mapped_column(nullable=False)
+    media_type: Mapped[str] = mapped_column()
 
     def __str__(self):
         return f"Agencie {self.name, self.url}"

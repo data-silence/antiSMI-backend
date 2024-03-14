@@ -1,4 +1,8 @@
+import datetime
 from datetime import date
+from datetime import timedelta
+
+from fastapi.openapi.models import MediaType
 from sqlalchemy import select, and_
 
 from app.db import asmi_async_session_maker, tm_async_session_maker
@@ -26,6 +30,19 @@ class NewsDao(BaseDao):
             return result.mappings().all()
 
     @staticmethod
+    async def get_media_types_news(media_type: str):
+        async with asmi_async_session_maker() as session:
+            query = (
+                select(News.__table__.columns, Agencies.telegram)
+                .join(News, Agencies.telegram == News.agency)
+                .where(News.date >= date.today())
+                .filter(
+                    Agencies.media_type == media_type and Agencies.media_type == 'Non-political' and Agencies.media_type == 'Neutral')
+            )
+            result = await session.execute(query)
+            return result.mappings().all()
+
+    @staticmethod
     async def get_news_by_date(start: date, end: date, **filter_by):
         async with asmi_async_session_maker() as session:
             query = select(News.__table__.columns).where(
@@ -33,6 +50,12 @@ class NewsDao(BaseDao):
             ).filter_by(**filter_by).order_by(News.date.desc())
             result = await session.execute(query)
             return result.mappings().all()
+
+    # start: date, end: date, ** filter_by
+    # .where(and_(start < News.date, News.date < end))
+    # .filter_by(**filter_by)
+    # .order_by(News.date.desc())
+
 
     @staticmethod
     async def get_embs_news(start: date, end: date, **filter_by):
@@ -43,7 +66,6 @@ class NewsDao(BaseDao):
             result = await session.execute(query)
             return result.mappings().all()
 
-
     @staticmethod
     async def get_similar_news(embedding: list[float]):
         async with tm_async_session_maker() as session:
@@ -51,8 +73,6 @@ class NewsDao(BaseDao):
                 Embs.embedding.l2_distance(embedding)).limit(100)
             result = await session.execute(query)
             return result.mappings().all()
-
-
 
     # @staticmethod
     # async def get_similar_news(embedding: list[float], start_date: date, end_date: date, news_amount: int,
