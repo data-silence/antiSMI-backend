@@ -37,7 +37,7 @@ class NewsDao(BaseDao):
                 .join(News, Agencies.telegram == News.agency)
                 .where(News.date >= date.today())
                 .filter(
-                    Agencies.media_type == media_type and Agencies.media_type == 'Non-political' and Agencies.media_type == 'Neutral')
+                    Agencies.media_type == media_type or Agencies.media_type == 'Non-political' or Agencies.media_type == 'Neutral')
             )
             result = await session.execute(query)
             return result.mappings().all()
