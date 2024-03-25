@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-# from app.agencies.schemas import SAgencies
-# from app.agencies.dao import AgenciesDao
+from app.agencies.schemas import SAgencies, SAllAgencies
+from app.agencies.dao import AgenciesDao
 
 router = APIRouter(
     prefix='/agencies',
@@ -9,6 +9,7 @@ router = APIRouter(
 )
 
 
-# @router.get('/take_some')
-# async def get_allowed_agencies() -> list[SAgencies]:
-#     return await AgenciesDao.get_all(is_forbidden=False)
+@router.get('/all')
+async def get_all_agencies() -> list[SAllAgencies]:
+    return await AgenciesDao.get_all()
+    # return await AgenciesDao.get_all(is_forbidden=False)

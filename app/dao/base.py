@@ -23,6 +23,6 @@ class BaseDao:
     @classmethod
     async def get_all(cls, **filter_by):
         async with asmi_async_session_maker() as session:
-            query = select(cls.model.__table__.columns).filter_by(**filter_by).limit(5)
+            query = select(cls.model.__table__.columns).filter_by(**filter_by)
             result = await session.execute(query)
             return result.mappings().all()

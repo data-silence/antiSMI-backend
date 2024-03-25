@@ -32,6 +32,14 @@ class SEmbsNews(SFullNews):
     class Config:
         from_attributes = True
 
+
+class SGreatNews(SEmbsNews):
+    agency: str
+
+    class Config:
+        from_attributes = True
+
+
 class CategoriesNames(str, Enum):
     """"Enum Class, contains the available news categories"""
     ECONOMY = 'economy'
