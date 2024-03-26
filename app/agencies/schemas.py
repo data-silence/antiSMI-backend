@@ -29,8 +29,8 @@ class SAllAgencies(SAgencies):
     # phone: str
     # chief_name: str
     # description: str
-    # last: str
-    # first: str
+    last: str | None
+    first: str | None
     # middle: str
     street: str | None
     street_type: str | None
