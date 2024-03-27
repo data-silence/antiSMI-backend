@@ -3,7 +3,7 @@ from datetime import date
 from datetime import timedelta
 
 from fastapi.openapi.models import MediaType
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, distinct, func, cast, Date
 
 from app.db import asmi_async_session_maker, tm_async_session_maker
 from app.news.models import News, Embs
@@ -83,6 +83,63 @@ class NewsDao(BaseDao):
                 Embs.embedding.l2_distance(embedding)).limit(news_amount)
             result = await session.execute(query)
             return result.mappings().all()
+
+    @staticmethod
+    async def get_agencies_amount(**filter_by):
+        async with tm_async_session_maker() as session:
+            query = func.count(distinct(News.agency))
+            result = await session.execute(query)
+            return result.scalar_one()
+
+    @staticmethod
+    async def get_categories_amount(**filter_by):
+        async with tm_async_session_maker() as session:
+            query = func.count(distinct(News.category))
+            result = await session.execute(query)
+            return result.scalar_one()
+
+
+    @staticmethod
+    async def get_news_amount(**filter_by):
+        async with tm_async_session_maker() as session:
+            query = func.count(News.news)
+            result = await session.execute(query)
+            return result.scalar_one()
+
+    @staticmethod
+    async def get_borderline_date(value: str):
+        async with tm_async_session_maker() as session:
+            match value:
+                case 'min':
+                    query = func.min(News.date)
+                case 'max':
+                    query = func.max(News.date)
+            result = await session.execute(query)
+            return result.scalar_one()
+
+
+    @staticmethod
+    async def get_max_date(**filter_by):
+        async with tm_async_session_maker() as session:
+            query = func.max(News.date)
+            result = await session.execute(query)
+            return result.scalar_one()
+
+    @staticmethod
+    async def get_min_date(**filter_by):
+        async with tm_async_session_maker() as session:
+            query = func.min(News.date)
+            result = await session.execute(query)
+            return result.scalar_one()
+
+    @staticmethod
+    async def get_distinct_dates(**filter_by):
+        async with tm_async_session_maker() as session:
+            query = select(cast(News.date, Date), func.count(cast(News.date, Date))).group_by(cast(News.date, Date)).order_by(cast(News.date, Date))
+            result = await session.execute(query)
+            return result.mappings().all()
+
+
 
     # @classmethod
     # async def find_all(cls, **filter_by):
