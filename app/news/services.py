@@ -10,8 +10,6 @@ from collections import Counter
 import numpy as np
 from numpy.linalg import norm
 from app.news.embs_exps import make_single_embs
-import torch
-from transformers import AutoTokenizer, AutoModel
 
 api_url = "http://127.0.0.1:8000"
 default_day = dt.date(year=2014, month=2, day=22)
@@ -25,23 +23,24 @@ def get_time_period(start_date: datetime.date = datetime.now(),
 
     start = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=00, minute=00)
     end = datetime(year=end_date.year, month=end_date.month, day=end_date.day, hour=23, minute=59)
+    one_day = dt.timedelta(days=1)
 
-    if start_date.day == datetime.today():
+    if start_date == datetime.today():
         if start_date.hour in range(0, 10):
-            start = datetime(year=start_date.year, month=start_date.month, day=start_date.day - 1, hour=20, minute=56)
-            end = datetime(year=start_date.year, month=start_date.month, day=start_date.day - 1, hour=22, minute=55)
+            start = start.replace(hour=20, minute=56) - one_day
+            end = end.replace(hour=22, minute=55) - one_day
         if start_date.hour in range(10, 14):
-            start = datetime(year=start_date.year, month=start_date.month, day=start_date.day - 1, hour=22, minute=56)
-            end = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=8, minute=55)
+            start = start.replace(hour=22, minute=56) - one_day
+            end = end.replace(hour=8, minute=55)
         if start_date.hour in range(14, 18):
-            start = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=8, minute=56)
-            end = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=12, minute=55)
+            start = start.replace(hour=8, minute=56)
+            end = end.replace(hour=12, minute=55)
         if start_date.hour in range(18, 22):
-            start = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=12, minute=56)
-            end = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=16, minute=55)
+            start = start.replace(hour=12, minute=56)
+            end = end.replace(hour=16, minute=55)
         if start_date.hour in range(22, 24):
-            start = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=16, minute=56)
-            end = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=20, minute=55)
+            start = start.replace(hour=16, minute=56)
+            end = end.replace(hour=20, minute=55)
 
     return start, end
 
@@ -162,8 +161,8 @@ def get_today_emb():
 
 
 if __name__ == "__main__":
-
-    df = get_today_emb()
-    print(df.head())
+    pass
+    # df = get_today_emb()
+    # print(df.head())
     # print(get_time_period())
     # print(dt.datetime.now() - start)

@@ -33,8 +33,8 @@ class SEmbsNews(SFullNews):
         from_attributes = True
 
 
-class SGreatNews(SEmbsNews):
-    agency: str
+class SMediaNews(SFullNews):
+    media_type: str
 
     class Config:
         from_attributes = True
