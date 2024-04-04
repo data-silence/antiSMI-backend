@@ -37,4 +37,4 @@ class Agencies(Base):
     media_type: Mapped[str] = mapped_column()
 
     def __str__(self):
-        return f"Agencie {self.name, self.url}"
+        return f"Agency {self.name, self.url}"

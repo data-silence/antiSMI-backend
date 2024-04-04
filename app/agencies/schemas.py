@@ -23,6 +23,5 @@ class SAllAgencies(SAgencies):
     street: str | None
     street_type: str | None
 
-
     class Config:
         from_attributes = True
