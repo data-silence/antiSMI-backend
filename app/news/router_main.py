@@ -35,6 +35,22 @@ async def get_quota() -> list[SFullNews]:
     return await NewsDao.get_news_by_date(start=start, end=end)
 
 
+@router.get('/asmi/date_news/{user_date}')
+async def get_some_quota(user_date: date) -> list[SEmbsNews]:
+    """
+    Handler to fetch all today news. If the request is made at a time when the news has not been processed yet,
+    yesterday's news will be requested.
+    """
+    start, end = get_time_period()
+    answer_list = await NewsDao.get_news_by_date(start=start, end=end)
+    result_list = [dict(el) for el in answer_list]
+
+    for el in range(len(result_list)):
+        result_list[el]['embedding'] = model_class.get_sentence_vector(result_list[el]['news']).tolist()
+
+    return result_list
+
+
 @router.get('/asmi/today')
 async def get_test_type() -> list[SMediaNews]:
     """Handler to fetch today news without further logic"""

@@ -1,6 +1,8 @@
 from datetime import datetime
 import datetime as dt
 import json
+
+import pytz
 import requests
 from io import StringIO
 from collections import Counter
@@ -27,9 +29,14 @@ default_day = dt.date(year=2014, month=2, day=22)
 default_categories = ['society', 'economy', 'technology', 'entertainment', 'science', 'sports']
 
 
-def get_time_period(start_date: datetime.date = datetime.now(),
-                    end_date: datetime.date = None) -> tuple:  # + timedelta(hours=3)
-    """Helps to convert dates to datetime objects"""
+def get_time_period(start_date: datetime.date = datetime.now(pytz.timezone('Europe/Moscow')),
+                    end_date: datetime.date = None, mode: str = None) -> tuple:
+    """
+    Helps to convert dates to datetime objects. It's depends on time because of news stream is not continuous
+    Handles the case where the current date is requested.
+    It has two modes: when the exact period of the last tranche of recent news is required,
+    or when just all the news of the day is required
+    """
     if end_date is None:
         end_date = start_date
 
@@ -37,22 +44,27 @@ def get_time_period(start_date: datetime.date = datetime.now(),
     end = datetime(year=end_date.year, month=end_date.month, day=end_date.day, hour=23, minute=59)
     one_day = dt.timedelta(days=1)
 
-    if start_date == datetime.today():
-        if start_date.hour in range(0, 10):
-            start = start.replace(hour=20, minute=56) - one_day
-            end = end.replace(hour=22, minute=55) - one_day
-        if start_date.hour in range(10, 14):
-            start = start.replace(hour=22, minute=56) - one_day
-            end = end.replace(hour=8, minute=55)
-        if start_date.hour in range(14, 18):
-            start = start.replace(hour=8, minute=56)
-            end = end.replace(hour=12, minute=55)
-        if start_date.hour in range(18, 22):
-            start = start.replace(hour=12, minute=56)
-            end = end.replace(hour=16, minute=55)
-        if start_date.hour in range(22, 24):
-            start = start.replace(hour=16, minute=56)
-            end = end.replace(hour=20, minute=55)
+    if start_date.date() == datetime.now(pytz.timezone('Europe/Moscow')).date():
+        match mode:
+            case 'precision':
+                if start_date.hour in range(0, 10):
+                    start = start.replace(hour=20, minute=56) - one_day
+                    end = end.replace(hour=22, minute=55) - one_day
+                if start_date.hour in range(10, 14):
+                    start = start.replace(hour=22, minute=56) - one_day
+                    end = end.replace(hour=8, minute=55)
+                if start_date.hour in range(14, 18):
+                    start = start.replace(hour=8, minute=56)
+                    end = end.replace(hour=12, minute=55)
+                if start_date.hour in range(18, 22):
+                    start = start.replace(hour=12, minute=56)
+                    end = end.replace(hour=16, minute=55)
+                if start_date.hour in range(22, 24):
+                    start = start.replace(hour=16, minute=56)
+                    end = end.replace(hour=20, minute=55)
+            case _:
+                if start_date.hour in range(0, 10):
+                    start, end = start - one_day, end - one_day
 
     return start, end
 
@@ -71,14 +83,14 @@ def get_clusters_columns(date: dt.date) -> pd.DataFrame:
     df = get_date_df_from_handler(date)
 
     if len(df) > 1:  # clustering is possible only if the number of news items is more than one
-        model = AgglomerativeClustering(n_clusters=None, metric='cosine', linkage='complete',
-                                        distance_threshold=0.3)
-        labels = model.fit_predict(list(df.embedding))
+        model_clust = AgglomerativeClustering(n_clusters=None, metric='cosine', linkage='complete',
+                                              distance_threshold=0.3)
+        labels = model_clust.fit_predict(list(df.embedding))
         df.loc[:, 'label'] = labels
 
     elif len(df) == 1:  # If there's only one news item, we give it a label = -1
         df.loc[:, 'label'] = -1
-    # To avoid categorising the same news item in different categories, we assign one label to the most frequent category
+    # To avoid categorising the same news item in different categories we assign one label to the most frequent category
     trans = df.groupby(by=['label'])['category'].agg(pd.Series.mode)
     df['new'] = df.label.apply(lambda x: trans.iloc[x])
     # Leave only one value if the mod produces multiple values in np.ndarray
