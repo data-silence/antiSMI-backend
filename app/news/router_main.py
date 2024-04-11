@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from datetime import date
 
 from app.news.dao import NewsDao
-from app.news.schemas import SShortNews, SFullNews, SEmbsNews, SMediaNews
+from app.news.schemas import SShortNews, SFullNews, SEmbsNews, SMediaNews, SFinalNews
 from app.news.services import get_time_period, make_single_embs
 
 import fasttext as fasttext
@@ -36,7 +36,7 @@ async def get_quota() -> list[SFullNews]:
 
 
 @router.get('/asmi/date_news/{user_date}')
-async def get_some_quota(user_date: date) -> list[SEmbsNews]:
+async def get_some_quota(user_date: date) -> list[SFinalNews]:
     """
     Handler to fetch all today news. If the request is made at a time when the news has not been processed yet,
     yesterday's news will be requested.

@@ -44,6 +44,15 @@ class SMediaNews(SFullNews):
         from_attributes = True
 
 
+class SFinalNews(SEmbsNews):
+    """Class representing the news in a full form with embeddings and media types"""
+    media_type: str
+
+    class Config:
+        from_attributes = True
+
+
+
 class CategoriesNames(str, Enum):
     """"Enum Class, contains the available news categories"""
     ECONOMY = 'economy'

@@ -70,9 +70,9 @@ class NewsDao(BaseDao):
     async def get_news_by_date(start: date, end: date, **filter_by):
         """Picks up news between two daytime values using filter"""
         async with asmi_async_session_maker() as session:
-            query = select(News.__table__.columns).where(
+            query = select(News.__table__.columns, Agencies.media_type).where(
                 and_(start <= News.date, News.date <= end)
-            ).filter_by(**filter_by).order_by(News.date.desc())
+            ).join(News, Agencies.telegram == News.agency).filter_by(**filter_by).order_by(News.date.desc())
             result = await session.execute(query)
             return result.mappings().all()
 

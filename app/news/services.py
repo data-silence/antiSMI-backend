@@ -44,7 +44,7 @@ def get_time_period(start_date: datetime.date = datetime.now(pytz.timezone('Euro
     end = datetime(year=end_date.year, month=end_date.month, day=end_date.day, hour=23, minute=59)
     one_day = dt.timedelta(days=1)
 
-    if start_date.date() == datetime.now(pytz.timezone('Europe/Moscow')).date():
+    if start.date() == datetime.now(pytz.timezone('Europe/Moscow')).date():
         match mode:
             case 'precision':
                 if start_date.hour in range(0, 10):
