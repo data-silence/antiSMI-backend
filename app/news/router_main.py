@@ -35,8 +35,8 @@ async def get_quota() -> list[SFullNews]:
     return await NewsDao.get_news_by_date(start=start, end=end)
 
 
-@router.get('/asmi/date_news/{user_date}')
-async def get_some_quota(user_date: date) -> list[SFinalNews]:
+@router.get('/asmi/date_news/{user_date}/{date_part}/{date_mode}')
+async def get_some_quota(user_date: date, date_part: int, date_made: str) -> list[SFinalNews]:
     """
     Handler to fetch all today news. If the request is made at a time when the news has not been processed yet,
     yesterday's news will be requested.

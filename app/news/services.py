@@ -29,8 +29,52 @@ default_day = dt.date(year=2014, month=2, day=22)
 default_categories = ['society', 'economy', 'technology', 'entertainment', 'science', 'sports']
 
 
-def get_time_period(start_date: datetime.date = datetime.now(pytz.timezone('Europe/Moscow')),
-                    end_date: datetime.date = None, mode: str = None) -> tuple:
+def get_time_period(mode: str, start_date: datetime.date = datetime.now().date(),
+                    date_part: int = 0) -> tuple:
+    """
+    Helps to convert dates to datetime objects.
+    It has two modes: when the exact period of the last tranche of recent news is required,
+    or when just all the news of the day is required
+    """
+
+    # Determining the correct day for the query conditions:
+    start = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=00, minute=00)
+    start.replace(tzinfo=pytz.timezone('Europe/Moscow'))
+    end = start.replace(hour=23, minute=59)
+    one_day = dt.timedelta(days=1)
+
+    if date_part == 0:
+        start = start_date - one_day
+        end = start_date - one_day
+
+    if date_part == 1:
+        start = start_date - one_day
+
+    # Determining the correct time depending on mode and date_part
+    match mode:
+        case 'full':
+            return start, end
+        case 'precision':
+            if date_part == 0:
+                start = start.replace(hour=20, minute=56)
+                end = end.replace(hour=22, minute=55)
+            if date_part == 1:
+                start = start.replace(hour=22, minute=56)
+                end = end.replace(hour=8, minute=55)
+            if date_part == 2:
+                start = start.replace(hour=8, minute=56)
+                end = end.replace(hour=12, minute=55)
+            if date_part == 3:
+                start = start.replace(hour=12, minute=56)
+                end = end.replace(hour=16, minute=55)
+            if date_part == 4:
+                start = start.replace(hour=16, minute=56)
+                end = end.replace(hour=20, minute=55)
+            return start, end
+
+
+def get_time_period_old(start_date: datetime.date = datetime.now(pytz.timezone('Europe/Moscow')),
+                        end_date: datetime.date = None, mode: str = None) -> tuple:
     """
     Helps to convert dates to datetime objects. It's depends on time because of news stream is not continuous
     Handles the case where the current date is requested.
@@ -115,7 +159,7 @@ def filter_df(df: pd.DataFrame, amount: int = 3, categories: list = ['society', 
     return df[df.label.isin(final_labels)]
 
 
-def cos_simularity(a, b) -> float:
+def cos_simularity(a: list[float], b: list[float]) -> float:
     """Calculates cosine similarity between two embeddings"""
     cos_sim = np.dot(a, b) / (norm(a) * norm(b))
     return cos_sim
