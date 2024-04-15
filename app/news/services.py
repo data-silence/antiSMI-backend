@@ -29,48 +29,53 @@ default_day = dt.date(year=2014, month=2, day=22)
 default_categories = ['society', 'economy', 'technology', 'entertainment', 'science', 'sports']
 
 
-def get_time_period(mode: str, start_date: datetime.date = datetime.now().date(),
-                    date_part: int = 0) -> tuple:
+def get_time_period(user_start: datetime.date, user_end: datetime.date = None,
+                    date_part: int = None, mode: str = None) -> tuple:
     """
-    Helps to convert dates to datetime objects.
+    Helps to convert dates to datetime objects for handlers usage.
     It has two modes: when the exact period of the last tranche of recent news is required,
     or when just all the news of the day is required
     """
 
-    # Determining the correct day for the query conditions:
-    start = datetime(year=start_date.year, month=start_date.month, day=start_date.day, hour=00, minute=00)
-    start.replace(tzinfo=pytz.timezone('Europe/Moscow'))
-    end = start.replace(hour=23, minute=59)
+    # 1. Determining the correct day depending on the query conditions:
     one_day = dt.timedelta(days=1)
 
+    handler_start = datetime(year=user_start.year, month=user_start.month, day=user_start.day, hour=00, minute=00)
+
+    # If the end date has been transferred [for Timemachine Service]
+    if user_end is None:
+        handler_end = handler_start.replace(hour=23, minute=59)
+    else:
+        handler_end = datetime(year=user_end.year, month=user_end.month, day=user_end.day, hour=23, minute=59)
+
+    # When news in the current time period has not been received -> it is necessary to use the news of the previous day
     if date_part == 0:
-        start = start_date - one_day
-        end = start_date - one_day
-
+        handler_start = handler_start - one_day
+        handler_end = handler_end - one_day
     if date_part == 1:
-        start = start_date - one_day
+        handler_start = handler_start - one_day
 
-    # Determining the correct time depending on mode and date_part
+    # 2. Determining the correct time depending on mode and date_part
     match mode:
-        case 'full':
-            return start, end
         case 'precision':
             if date_part == 0:
-                start = start.replace(hour=20, minute=56)
-                end = end.replace(hour=22, minute=55)
+                handler_start = handler_start.replace(hour=20, minute=56)
+                handler_end = handler_end.replace(hour=22, minute=55)
             if date_part == 1:
-                start = start.replace(hour=22, minute=56)
-                end = end.replace(hour=8, minute=55)
+                handler_start = handler_start.replace(hour=22, minute=56)
+                handler_end = handler_end.replace(hour=8, minute=55)
             if date_part == 2:
-                start = start.replace(hour=8, minute=56)
-                end = end.replace(hour=12, minute=55)
+                handler_start = handler_start.replace(hour=8, minute=56)
+                handler_end = handler_end.replace(hour=12, minute=55)
             if date_part == 3:
-                start = start.replace(hour=12, minute=56)
-                end = end.replace(hour=16, minute=55)
+                handler_start = handler_start.replace(hour=12, minute=56)
+                handler_end = handler_end.replace(hour=16, minute=55)
             if date_part == 4:
-                start = start.replace(hour=16, minute=56)
-                end = end.replace(hour=20, minute=55)
-            return start, end
+                handler_start = handler_start.replace(hour=16, minute=56)
+                handler_end = handler_end.replace(hour=20, minute=55)
+            return handler_start, handler_end
+        case _:
+            return handler_start, handler_end
 
 
 def get_time_period_old(start_date: datetime.date = datetime.now(pytz.timezone('Europe/Moscow')),

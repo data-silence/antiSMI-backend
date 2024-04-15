@@ -25,6 +25,12 @@ async def get_allowed_quota() -> list[SShortNews]:
     return await NewsDao.get_allowed_news_by_date(start=start, end=end)
 
 
+@router.get('/asmi/today')
+async def get_test_type() -> list[SMediaNews]:
+    """Handler to fetch today news without further logic"""
+    return await NewsDao.get_today_news()
+
+
 @router.get('/asmi/today/brief')
 async def get_quota() -> list[SFullNews]:
     """
@@ -36,12 +42,12 @@ async def get_quota() -> list[SFullNews]:
 
 
 @router.get('/asmi/date_news/{user_date}/{date_part}/{date_mode}')
-async def get_some_quota(user_date: date, date_part: int, date_made: str) -> list[SFinalNews]:
+async def get_some_quota(user_date: date, date_part: int, date_mode: str) -> list[SFinalNews]:
     """
-    Handler to fetch all today news. If the request is made at a time when the news has not been processed yet,
+    Handler to fetch one day news from aSMI. If the request is made at a time when the news has not been processed yet,
     yesterday's news will be requested.
     """
-    start, end = get_time_period()
+    start, end = get_time_period(user_start=user_date, date_part=date_part, mode=date_mode)
     answer_list = await NewsDao.get_news_by_date(start=start, end=end)
     result_list = [dict(el) for el in answer_list]
 
@@ -49,12 +55,6 @@ async def get_some_quota(user_date: date, date_part: int, date_made: str) -> lis
         result_list[el]['embedding'] = model_class.get_sentence_vector(result_list[el]['news']).tolist()
 
     return result_list
-
-
-@router.get('/asmi/today')
-async def get_test_type() -> list[SMediaNews]:
-    """Handler to fetch today news without further logic"""
-    return await NewsDao.get_today_news()
 
 
 @router.get('/asmi/today/{media_type}')
@@ -66,7 +66,7 @@ async def get_media_type(media_type: str) -> list[SFullNews]:
 @router.get('/tm/{start_date}/{end_date}')
 async def get_embs_news(start_date: date = date.today(), end_date: date = date.today()) -> list[SEmbsNews]:
     """Handler to fetch past news over a period of time"""
-    start, end = get_time_period(start_date=start_date, end_date=end_date)
+    start, end = get_time_period(user_start=start_date, user_end=end_date)
     return await NewsDao.get_embs_news(start=start, end=end)
 
 
