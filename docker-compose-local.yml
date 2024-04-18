@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+
+    fastapi:
+        build: .
+        env_file:
+            - ./.env
+        restart: always
+        container_name: asmi_backend
+        ports:
+          - 8000:8000
+        image: say_my_name/asmi_backend

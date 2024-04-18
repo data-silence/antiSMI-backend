@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     def API_URL(self) -> str:
         return self.API_URL
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env-non-dev")
 
 
 settings = Settings()
