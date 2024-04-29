@@ -22,8 +22,9 @@ Important: you will not be able to deploy the API without access to a specially 
 
 1. Clone the repository into the empty directory selected for the project:
 `git clone https://github.com/data-silence/antiSMI-backend`
-2. Make sure that docker is installed on the server. Build the image using the command `docker build -t -backend`
-3. Start the container using `docker run -d --rm --name backend -p 8000:8000 backend`   
+2. Make sure that docker is installed on the server. Build the image from the destination directory using the command `docker build -t -backend`
+3. Start the container using `docker run -d --rm --name backend -p 8000:8000 backend`
+4. Your API server will start on port 8000
 
 
 ## Stack
