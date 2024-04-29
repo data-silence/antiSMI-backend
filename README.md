@@ -1,6 +1,6 @@
 # antiSMI Backend
 
-![]()
+![logo](https://github.com/data-silence/antiSMI-backend/blob/master/img/Backend.jpg?raw=true)
 
 ## Table of contents
 * [About](#about)
