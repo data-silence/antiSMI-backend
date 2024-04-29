@@ -12,9 +12,9 @@
 
 ## About
 
-The Backend is the foundation for the AntiSMI project, which is async and based on the FastAPI framework.
-Serves to retrieve various views of news items stored in the project databases.
-Used by the frontend of the applications created within the project: Web-App, AntiSMI-bot and Timemachine-bot.  
+The backend is a fundamental component of the AntiSMI project. It operates asynchronously using the FastAPI framework.
+This API retrieves various views of news articles stored in the project databases. The backend gets these views to the frontend of applications developed within the project, including Web-App, AntiSMI-bot and Timemachine-bot.
+
 
 ## Usage
 
