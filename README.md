@@ -2,7 +2,7 @@
 
 ![logo](https://github.com/data-silence/antiSMI-backend/blob/master/img/Backend.jpg?raw=true)
 
-![Fastapi](https://img.shields.io/badge/Fastapi-black?style=flat-square&logo=fastapi) ![Pydantic](https://img.shields.io/badge/Pydantic-black?style=flat-square&logo=Pydantic) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-black?style=flat-square&logo=PostgreSQL) 
+![Fastapi](https://img.shields.io/badge/Fastapi-black?style=flat-square&logo=fastapi) ![Pydantic](https://img.shields.io/badge/Pydantic-black?style=flat-square&logo=Pydantic) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-black?style=flat-square&logo=PostgreSQL) ![Docker](https://img.shields.io/badge/docker-%230db7ed?style=flat-square&logo=Docker) 
 
 ## Table of contents
 * [About](#about)
@@ -20,13 +20,16 @@ This API retrieves various views of news articles stored in the project database
 
 ## Self deploy
 
-Important: you will not be able to deploy the API without access to a specially prepared database.  
-
 1. Clone the repository into the empty directory selected for the project:
 `git clone https://github.com/data-silence/antiSMI-backend`
-2. Make sure that docker is installed on the server. Build the image from the destination directory using the command `docker build -t -backend`
-3. Start the container using `docker run -d --rm --name backend -p 8000:8000 backend`
-4. Your API server will start on port 8000
+2. Copy `.env-non-dev` into root. Create directory `models` and copy the categorisation model file `cat_model.ftz` into it 
+3. Make sure that docker is installed on the server. Build the image from the destination directory using the command `docker build -t -backend`
+4. Start the container using `docker run -d --rm --name backend -p 8000:8000 backend`
+5. Your API server will start on port 8000
+
+_Important_: you will not be able to deploy the API without access to step 2 and a specially prepared database.  
+
+
 
 
 ## Stack
