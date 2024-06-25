@@ -18,27 +18,27 @@ router = APIRouter(
 )
 
 
-@router.get('/last_allowed_quota')
-async def get_allowed_quota() -> list[SShortNews]:
-    """Handler to fetch last allowed news"""
-    start, end = get_time_period()
-    return await NewsDao.get_allowed_news_by_date(start=start, end=end)
-
-
-@router.get('/asmi/today')
-async def get_test_type() -> list[SMediaNews]:
-    """Handler to fetch today news without further logic"""
-    return await NewsDao.get_today_news()
-
-
-@router.get('/asmi/today/brief')
-async def get_quota() -> list[SFullNews]:
-    """
-    Handler to fetch all today news. If the request is made at a time when the news has not been processed yet,
-    yesterday's news will be requested.
-    """
-    start, end = get_time_period()
-    return await NewsDao.get_news_by_date(start=start, end=end)
+# @router.get('/last_allowed_quota')
+# async def get_allowed_quota() -> list[SShortNews]:
+#     """Handler to fetch last allowed news"""
+#     start, end = get_time_period()
+#     return await NewsDao.get_allowed_news_by_date(start=start, end=end)
+#
+#
+# @router.get('/asmi/today')
+# async def get_test_type() -> list[SMediaNews]:
+#     """Handler to fetch today news without further logic"""
+#     return await NewsDao.get_today_news()
+#
+#
+# @router.get('/asmi/today/brief')
+# async def get_quota() -> list[SFullNews]:
+#     """
+#     Handler to fetch all today news. If the request is made at a time when the news has not been processed yet,
+#     yesterday's news will be requested.
+#     """
+#     start, end = get_time_period()
+#     return await NewsDao.get_news_by_date(start=start, end=end)
 
 
 @router.get('/asmi/date_news/{user_date}/{date_part}/{date_mode}')
